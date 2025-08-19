@@ -1,13 +1,80 @@
 - name: Setup github runner
   hosts: runner
   become: yes
+  vars:
+    USERNAME: "{{ lookup('env','TF_VAR_ssh_username') }}"
 
   tasks:
-    - name: Download install_docker.sh to the remote host
-      get_url:
-        url: https://gist.githubusercontent.com/welel/f80c96482e3b539487b9fa08bfcab86d/raw/90bc2330924d225aef7dc3178f5926bda7daff04/install_docker.sh
-        dest: /tmp/install_docker.sh
-        mode: '0755'
+    - name: Install the required packages
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop: [unzip, ansible-core]
 
-    - name: Execute the install_docker.sh script (docker + docker compose plugin)
-      command: /tmp/install_docker.sh
+    - name: Install Docker
+      shell: |
+        curl -fsSL https://get.docker.com | sh
+        mkdir -p actions-runner
+
+    - name: Install Trivy
+      shell: curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.65.0
+
+    - name: Download google chrome .deb package
+      get_url:
+        url: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        dest: /tmp/google-chrome-stable_current_amd64.deb
+
+    - name: Install Google Chrome
+      apt:
+        deb: /tmp/google-chrome-stable_current_amd64.deb
+        state: present
+
+    - name: Download chromedriver.zip
+      get_url:
+        url: https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
+        dest: /tmp/chromedriver_linux64.zip
+
+    - name: unzip the chromedriver.zip
+      unarchive:
+        src: /tmp/chromedriver_linux64.zip
+        dest: /tmp/
+        remote_src: yes
+
+    - name: move chromedriver
+      command: mv /tmp/chromedriver /usr/bin/chromedriver
+
+    - name: Download GitHub Actions runner
+      get_url:
+        url: https://github.com/actions/runner/releases/download/v2.328.0/actions-runner-linux-x64-2.328.0.tar.gz
+        dest: /tmp/actions-runner-linux-x64-2.328.0.tar.gz
+
+    - name: Extract GitHub Actions runner
+      unarchive:
+        src: /tmp/actions-runner-linux-x64-2.328.0.tar.gz
+        dest: /home/{{ USERNAME }}/actions-runner
+        remote_src: yes
+        owner: "{{ USERNAME }}"
+        group: "{{ USERNAME }}"
+
+    - name: Configure GitHub Actions runner
+      shell: |
+        ./config.sh \
+          --url https://github.com/ozennou/Wazuh-deployment-challenge \
+          --token $GITHUB_RUNNER_TOKEN \
+          --name wazuh-runner \
+          --runnergroup Default \
+          --labels self-hosted,Linux,X64 \
+          --work _work \
+          --unattended
+      args:
+        chdir: /home/{{ USERNAME }}/actions-runner
+      environment:
+        GITHUB_RUNNER_TOKEN: "{{ lookup('env','GITHUB_RUNNER_TOKEN') }}"
+      become_user: "{{ USERNAME }}"
+
+    - name: Start GitHub Actions runner
+      shell: nohup ./run.sh &>/dev/null &
+      args:
+        chdir: /home/{{ USERNAME }}/actions-runner
+      become_user: "{{ USERNAME }}"

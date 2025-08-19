@@ -1,0 +1,13 @@
+- name: Setup github runner
+  hosts: runner
+  become: yes
+
+  tasks:
+    - name: Download install_docker.sh to the remote host
+      get_url:
+        url: https://gist.githubusercontent.com/welel/f80c96482e3b539487b9fa08bfcab86d/raw/90bc2330924d225aef7dc3178f5926bda7daff04/install_docker.sh
+        dest: /tmp/install_docker.sh
+        mode: '0755'
+
+    - name: Execute the install_docker.sh script (docker + docker compose plugin)
+      command: /tmp/install_docker.sh

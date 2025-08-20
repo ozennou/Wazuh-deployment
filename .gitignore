@@ -20,4 +20,5 @@ override.tf.json
 terraform.rc
 
 TODO.md
+NOTE.md
 infrastructure/inventory.ini

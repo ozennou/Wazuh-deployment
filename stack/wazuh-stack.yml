@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  wazuh-indexer:
+    image: wazuh/wazuh-indexer:4.13.0-rc3
+    hostname: "wazuh-indexer"
+    ports:
+      - "9200:9200"
+    environment:
+      - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "bootstrap.memory_lock=true"
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - 'node.role == worker'
+      restart_policy:
+        condition: any
+      resources:
+        limits:
+          memory: 2g
+    volumes:
+      - wazuh-indexer-data:/var/lib/wazuh-indexer
+    configs:
+      - source: wazuh_indexer_yml
+        target: /usr/share/wazuh-indexer/opensearch.yml
+      - source: root_ca_cert
+        target: /usr/share/wazuh-indexer/certs/root-ca.pem
+      - source: indexer_cert
+        target: /usr/share/wazuh-indexer/certs/wazuh.indexer.pem
+      - source: indexer_key
+        target: /usr/share/wazuh-indexer/certs/wazuh.indexer.key
+      - source: admin_cert
+        target: /usr/share/wazuh-indexer/certs/admin.pem
+      - source: admin_key
+        target: /usr/share/wazuh-indexer/certs/admin-key.pem
+
+volumes:
+  wazuh-indexer-data:
+
+configs:
+  wazuh_indexer_yml:
+    file: ./config/wazuh_indexer/wazuh.indexer.yml
+  root_ca_cert:
+    file: ./security/tls/wazuh_ssl_certs/root-ca.pem
+  indexer_cert:
+    file: ./security/tls/wazuh_ssl_certs/wazuh.indexer.pem
+  indexer_key:
+    file: ./security/tls/wazuh_ssl_certs/wazuh.indexer-key.pem
+  admin_cert:
+    file: ./security/tls/wazuh_ssl_certs/admin.pem
+  admin_key:
+    file: ./security/tls/wazuh_ssl_certs/admin-key.pem

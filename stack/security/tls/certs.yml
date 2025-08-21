@@ -1,11 +1,7 @@
 nodes:
   indexer:
-    - name: wazuh1.indexer
-      ip: wazuh1.indexer
-    - name: wazuh2.indexer
-      ip: wazuh2.indexer
-    - name: wazuh3.indexer
-      ip: wazuh3.indexer
+    - name: wazuh.indexer
+      ip: wazuh.indexer
 
   server:
     - name: wazuh.master

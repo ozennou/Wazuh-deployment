@@ -1,6 +1,6 @@
-variable "name_prefix" {
+variable "gituh_runner_name_prefix" {
   description = "name prefix for the name resources"
-  default     = "wazuh-deploy-challenge"
+  default     = "wazuh-github-runner"
 }
 
 variable "location" {

@@ -1,26 +1,26 @@
 ## GitHub actions self-hosted runner:
 
 resource "azurerm_resource_group" "default" {
-  name     = "${var.name_prefix}-resource-group"
+  name     = "${var.github_runner_name_prefix}-resource-group"
   location = var.location
 }
 
 resource "azurerm_virtual_network" "default" {
-  name                = "${var.name_prefix}-VN"
+  name                = "${var.github_runner_name_prefix}-VN"
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.default.location
   resource_group_name = azurerm_resource_group.default.name
 }
 
 resource "azurerm_subnet" "default" {
-  name                 = "${var.name_prefix}-subnet"
+  name                 = "${var.github_runner_name_prefix}-subnet"
   resource_group_name  = azurerm_resource_group.default.name
   virtual_network_name = azurerm_virtual_network.default.name
   address_prefixes     = ["10.0.0.0/24"]
 }
 
 resource "azurerm_public_ip" "default" {
-  name                = "${var.name_prefix}-public-ip"
+  name                = "${var.github_runner_name_prefix}-public-ip"
   location            = azurerm_resource_group.default.location
   resource_group_name = azurerm_resource_group.default.name
   allocation_method   = "Static"
@@ -28,7 +28,7 @@ resource "azurerm_public_ip" "default" {
 }
 
 resource "azurerm_network_security_group" "default" {
-  name                = "${var.name_prefix}-NSG"
+  name                = "${var.github_runner_name_prefix}-NSG"
   location            = azurerm_resource_group.default.location
   resource_group_name = azurerm_resource_group.default.name
 
@@ -58,7 +58,7 @@ resource "azurerm_network_security_group" "default" {
 }
 
 resource "azurerm_network_interface" "default" {
-  name                = "${var.name_prefix}-NIC"
+  name                = "${var.github_runner_name_prefix}-NIC"
   location            = azurerm_resource_group.default.location
   resource_group_name = azurerm_resource_group.default.name
 
@@ -76,7 +76,7 @@ resource "azurerm_network_interface_security_group_association" "default" {
 }
 
 resource "azurerm_linux_virtual_machine" "default" {
-  name                = "${var.name_prefix}-VM"
+  name                = "${var.github_runner_name_prefix}-VM"
   location            = azurerm_resource_group.default.location
   resource_group_name = azurerm_resource_group.default.name
   size                = "Standard_D4ds_v4" ## 16 GB ram & 4 vCPU

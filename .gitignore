@@ -21,4 +21,5 @@ terraform.rc
 
 TODO.md
 NOTE.md
-infrastructure/inventory.ini
+infra-github-runner/inventory.ini
+wazuh_ssl_certs

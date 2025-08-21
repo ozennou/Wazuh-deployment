@@ -1,16 +1,21 @@
 version: "3.9"
 
+networks:
+  wazuh-overlay:
+    driver: overlay
+
 services:
   wazuh-indexer:
     image: wazuh/wazuh-indexer:4.13.0-rc3
-    hostname: "wazuh-indexer"
+    hostname: "wazuh{{.Task.Slot}}.indexer"
+    container_name: "wazuh{{.Task.Slot}}.indexer"
     ports:
       - "9200:9200"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
       - "bootstrap.memory_lock=true"
     deploy:
-      replicas: 1
+      replicas: 3
       placement:
         constraints:
           - 'node.role == worker'
@@ -26,14 +31,26 @@ services:
         target: /usr/share/wazuh-indexer/opensearch.yml
       - source: root_ca_cert
         target: /usr/share/wazuh-indexer/certs/root-ca.pem
-      - source: indexer_cert
-        target: /usr/share/wazuh-indexer/certs/wazuh.indexer.pem
-      - source: indexer_key
-        target: /usr/share/wazuh-indexer/certs/wazuh.indexer.key
+        #
+      - source: indexer_cert1
+        target: /usr/share/wazuh-indexer/certs/wazuh1.indexer.pem
+      - source: indexer_key1
+        target: /usr/share/wazuh-indexer/certs/wazuh1.indexer.key
+      - source: indexer_cert2
+        target: /usr/share/wazuh-indexer/certs/wazuh2.indexer.pem
+      - source: indexer_key2
+        target: /usr/share/wazuh-indexer/certs/wazuh2.indexer.key
+      - source: indexer_cert3
+        target: /usr/share/wazuh-indexer/certs/wazuh3.indexer.pem
+      - source: indexer_key3
+        target: /usr/share/wazuh-indexer/certs/wazuh3.indexer.key
+        #
       - source: admin_cert
         target: /usr/share/wazuh-indexer/certs/admin.pem
       - source: admin_key
         target: /usr/share/wazuh-indexer/certs/admin-key.pem
+    networks:
+      - wazuh-overlay
 
 volumes:
   wazuh-indexer-data:
@@ -43,10 +60,20 @@ configs:
     file: ./config/wazuh_indexer/wazuh.indexer.yml
   root_ca_cert:
     file: ./security/tls/wazuh_ssl_certs/root-ca.pem
-  indexer_cert:
-    file: ./security/tls/wazuh_ssl_certs/wazuh.indexer.pem
-  indexer_key:
-    file: ./security/tls/wazuh_ssl_certs/wazuh.indexer-key.pem
+  #
+  indexer_cert1:
+    file: ./security/tls/wazuh_ssl_certs/wazuh1.indexer.pem
+  indexer_key1:
+    file: ./security/tls/wazuh_ssl_certs/wazuh1.indexer-key.pem
+  indexer_cert2:
+    file: ./security/tls/wazuh_ssl_certs/wazuh2.indexer.pem
+  indexer_key2:
+    file: ./security/tls/wazuh_ssl_certs/wazuh2.indexer-key.pem
+  indexer_cert3:
+    file: ./security/tls/wazuh_ssl_certs/wazuh3.indexer.pem
+  indexer_key3:
+    file: ./security/tls/wazuh_ssl_certs/wazuh3.indexer-key.pem
+  #
   admin_cert:
     file: ./security/tls/wazuh_ssl_certs/admin.pem
   admin_key:

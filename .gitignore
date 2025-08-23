@@ -19,6 +19,7 @@ override.tf.json
 .terraformrc
 terraform.rc
 
+.env
 TODO.md
 NOTE.md
 infra-github-runner/inventory.ini

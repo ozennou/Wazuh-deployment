@@ -2,14 +2,14 @@ network.host: 0.0.0.0
 node.name: ${HOSTNAME}
 cluster.initial_master_nodes:
         - wazuh1.indexer
-        - wazuh2.indexer
-        - wazuh3.indexer
+        # - wazuh2.indexer
+        # - wazuh3.indexer
 cluster.name: "wazuh-cluster"
 discovery.seed_hosts:
         - wazuh1.indexer:9300
-        - wazuh2.indexer:9300
-        - wazuh3.indexer:9300
-node.max_local_storage_nodes: "3"
+        # - wazuh2.indexer:9300
+        # - wazuh3.indexer:9300
+node.max_local_storage_nodes: "1" #ril
 path.data: /var/lib/wazuh-indexer
 path.logs: /var/log/wazuh-indexer
 plugins.security.ssl.http.pemcert_filepath: ${OPENSEARCH_PATH_CONF}/certs/${HOSTNAME}.pem
@@ -27,10 +27,10 @@ plugins.security.check_snapshot_restore_write_privileges: true
 plugins.security.enable_snapshot_restore_privilege: true
 plugins.security.nodes_dn:
 - "CN=wazuh1.indexer,OU=Wazuh,O=Wazuh,L=California,C=US"
-- "CN=wazuh2.indexer,OU=Wazuh,O=Wazuh,L=California,C=US"
-- "CN=wazuh3.indexer,OU=Wazuh,O=Wazuh,L=California,C=US"
+# - "CN=wazuh2.indexer,OU=Wazuh,O=Wazuh,L=California,C=US"
+# - "CN=wazuh3.indexer,OU=Wazuh,O=Wazuh,L=California,C=US"
 - "CN=filebeat,OU=Wazuh,O=Wazuh,L=California,C=US"
 plugins.security.restapi.roles_enabled:
 - "all_access"
 - "security_rest_api_access"
-plugins.security.allow_default_init_securityindex: false
+plugins.security.allow_default_init_securityindex: true

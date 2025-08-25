@@ -4,8 +4,12 @@ nodes:
       ip: wazuh.indexer
 
   server:
-    - name: wazuh.manager
-      ip: wazuh.manager
+    - name: wazuh.master
+      ip: wazuh.master
+      node_type: master
+    - name: wazuh.worker
+      ip: wazuh.worker
+      node_type: worker
 
   dashboard:
     - name: wazuh.dashboard

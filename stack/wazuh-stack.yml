@@ -23,6 +23,9 @@ services:
         hard: 65536
     deploy:
       replicas: 1
+      placement:
+        constraints:
+          - 'node.role == worker'
       restart_policy:
         condition: any
     configs:
@@ -45,7 +48,7 @@ services:
 
   wazuh-manager:
     image: wazuh/wazuh-manager:4.12.0
-    hostname: wazuh.manager
+    hostname: wazuh.master
     networks:
       - wazuh-overlay
     depends_on:
@@ -64,6 +67,9 @@ services:
       - "55000:55000"
     deploy:
       replicas: 1
+      placement:
+        constraints:
+          - 'node.role == worker'
       restart_policy:
         condition: any
     environment:
@@ -77,9 +83,9 @@ services:
       - API_USERNAME=wazuh-wui
       - API_PASSWORD=MyS3cr37P450r.*-
     # volumes:
-    #   - wazuh-manager-ossec:/var/ossec
-    #   - filebeat_etc:/etc/filebeat
-    #   - filebeat_var:/var/lib/filebeat #ril
+    #   - wazuh-manager-master-ossec:/var/ossec
+    #   - master-filebeat-etc:/etc/filebeat
+    #   - master-filebeat-var:/var/lib/filebeat #ril
     configs:
       - source: root_ca_manager
         target: /etc/ssl/root-ca.pem
@@ -88,6 +94,49 @@ services:
       - source: manager_key
         target: /etc/ssl/filebeat.key
       - source: wazuh_manager_conf
+        target: /wazuh-config-mount/etc/ossec.conf
+
+  wazuh-worker:
+    image: wazuh/wazuh-manager:4.12.0
+    hostname: wazuh.worker
+    networks:
+      - wazuh-overlay
+    depends_on:
+      - wazuh-indexer
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 655360
+        hard: 655360
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - 'node.role == worker'
+      restart_policy:
+        condition: any
+    environment:
+      - INDEXER_URL=https://wazuh.indexer:9200
+      - INDEXER_USERNAME=admin
+      - INDEXER_PASSWORD=SecretPassword
+      - FILEBEAT_SSL_VERIFICATION_MODE=full
+      - SSL_CERTIFICATE_AUTHORITIES=/etc/ssl/root-ca.pem
+      - SSL_CERTIFICATE=/etc/ssl/filebeat.pem
+      - SSL_KEY=/etc/ssl/filebeat.key
+    # volumes:
+    #   - wazuh-manager-worker-ossec:/var/ossec
+    #   - worker-filebeat-etc:/etc/filebeat
+    #   - worker-filebeat-var:/var/lib/filebeat #ril
+    configs:
+      - source: root_ca_manager
+        target: /etc/ssl/root-ca.pem
+      - source: wazuh_worker_cert
+        target: /etc/ssl/filebeat.pem
+      - source: wazuh_worker_key
+        target: /etc/ssl/filebeat.key
+      - source: wazuh_worker_conf
         target: /wazuh-config-mount/etc/ossec.conf
 
   wazuh-dashboard:
@@ -102,13 +151,16 @@ services:
     environment:
       - INDEXER_USERNAME=admin
       - INDEXER_PASSWORD=SecretPassword
-      - WAZUH_API_URL=https://wazuh.manager
+      - WAZUH_API_URL=https://wazuh.master
       - DASHBOARD_USERNAME=kibanaserver
       - DASHBOARD_PASSWORD=kibanaserver
       - API_USERNAME=wazuh-wui
       - API_PASSWORD=MyS3cr37P450r.*-
     deploy:
       replicas: 1
+      placement:
+        constraints:
+          - 'node.role == worker'
       restart_policy:
         condition: any
     # volumes:
@@ -129,9 +181,12 @@ services:
 
 volumes:
   wazuh-indexer-data:
-  wazuh-manager-ossec:
-  filebeat_etc:
-  filebeat_var:
+  wazuh-manager-master-ossec:
+  wazuh-manager-worker-ossec:
+  master-filebeat-etc:
+  master-filebeat-var:
+  worker-filebeat-etc:
+  worker-filebeat-var:
   wazuh-dashboard-config:
   wazuh-dashboard-custom:
 
@@ -151,15 +206,22 @@ configs:
     file: ./config/wazuh_indexer/wazuh.indexer.yml
   internal_users_yml:
     file: ./config/wazuh_indexer/internal_users.yml
-  ## manager
+  ## manager master
   root_ca_manager:
     file: ./security/tls/wazuh_ssl_certs/root-ca-manager.pem
   manager_cert:
-    file: ./security/tls/wazuh_ssl_certs/wazuh.manager.pem
+    file: ./security/tls/wazuh_ssl_certs/wazuh.master.pem
   manager_key:
-    file: ./security/tls/wazuh_ssl_certs/wazuh.manager-key.pem
+    file: ./security/tls/wazuh_ssl_certs/wazuh.master-key.pem
   wazuh_manager_conf:
     file: ./config/wazuh_manager/wazuh_manager.conf
+  ## manager worker
+  wazuh_worker_cert:
+    file: ./security/tls/wazuh_ssl_certs/wazuh.worker.pem
+  wazuh_worker_key:
+    file: ./security/tls/wazuh_ssl_certs/wazuh.worker-key.pem
+  wazuh_worker_conf:
+    file: ./config/wazuh_manager/wazuh_worker.conf
   ## dashboard
   wazuh_dashboard_cert:
     file: ./security/tls/wazuh_ssl_certs/wazuh.dashboard.pem

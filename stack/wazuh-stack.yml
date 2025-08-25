@@ -5,82 +5,21 @@ networks:
     driver: overlay
 
 services:
-  wazuh-indexer:
-    image: wazuh/wazuh-indexer:4.13.0-rc3
-    hostname: "wazuh{{.Task.Slot}}.indexer"
-    container_name: "wazuh{{.Task.Slot}}.indexer"
+  wazuh.indexer:
+    image: wazuh/wazuh-indexer:4.12.0
+    hostname: wazuh.indexer
     ports:
       - "9200:9200"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
-      - "bootstrap.memory_lock=true"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
     deploy:
-      replicas: 1 #ril
-      placement:
-        constraints:
-          - 'node.role == worker'
+      replicas: 1
       restart_policy:
         condition: any
-      resources:
-        limits:
-          memory: 2g
-    volumes:
-      - wazuh-indexer-data:/var/lib/wazuh-indexer
-    configs:
-      - source: wazuh_indexer_yml
-        target: /usr/share/wazuh-indexer/opensearch.yml
-      - source: root_ca_cert
-        target: /usr/share/wazuh-indexer/certs/root-ca.pem
-        #
-      - source: indexer_cert1
-        target: /usr/share/wazuh-indexer/certs/wazuh1.indexer.pem
-      - source: indexer_key1
-        target: /usr/share/wazuh-indexer/certs/wazuh1.indexer.key
-      - source: indexer_cert2
-        target: /usr/share/wazuh-indexer/certs/wazuh2.indexer.pem
-      - source: indexer_key2
-        target: /usr/share/wazuh-indexer/certs/wazuh2.indexer.key
-      - source: indexer_cert3
-        target: /usr/share/wazuh-indexer/certs/wazuh3.indexer.pem
-      - source: indexer_key3
-        target: /usr/share/wazuh-indexer/certs/wazuh3.indexer.key
-        #
-      - source: admin_cert
-        target: /usr/share/wazuh-indexer/certs/admin.pem
-      - source: admin_key
-        target: /usr/share/wazuh-indexer/certs/admin-key.pem
-    networks:
-      - wazuh-overlay
-    healthcheck:
-      test: ["CMD-SHELL", "curl -s -u ${INDEXER_ADMIN_USER}:${INDEXER_ADMIN_PASSWD} -k https://localhost:9200/_cluster/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 40s
-
-volumes:
-  wazuh-indexer-data:
-
-configs:
-  wazuh_indexer_yml:
-    file: ./config/wazuh_indexer/wazuh.indexer.yml
-  root_ca_cert:
-    file: ./security/tls/wazuh_ssl_certs/root-ca.pem
-  #
-  indexer_cert1:
-    file: ./security/tls/wazuh_ssl_certs/wazuh1.indexer.pem
-  indexer_key1:
-    file: ./security/tls/wazuh_ssl_certs/wazuh1.indexer-key.pem
-  indexer_cert2:
-    file: ./security/tls/wazuh_ssl_certs/wazuh2.indexer.pem
-  indexer_key2:
-    file: ./security/tls/wazuh_ssl_certs/wazuh2.indexer-key.pem
-  indexer_cert3:
-    file: ./security/tls/wazuh_ssl_certs/wazuh3.indexer.pem
-  indexer_key3:
-    file: ./security/tls/wazuh_ssl_certs/wazuh3.indexer-key.pem
-  #
-  admin_cert:
-    file: ./security/tls/wazuh_ssl_certs/admin.pem
-  admin_key:
-    file: ./security/tls/wazuh_ssl_certs/admin-key.pem

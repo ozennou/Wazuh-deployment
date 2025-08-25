@@ -1,19 +1,11 @@
 nodes:
   indexer:
-    - name: wazuh1.indexer
-      ip: wazuh1.indexer
-    - name: wazuh2.indexer
-      ip: wazuh2.indexer
-    - name: wazuh3.indexer
-      ip: wazuh3.indexer
+    - name: wazuh.indexer
+      ip: wazuh.indexer
 
   server:
-    - name: wazuh.master
-      ip: wazuh.master
-      node_type: master
-    - name: wazuh.worker
-      ip: wazuh.worker
-      node_type: worker
+    - name: wazuh.manager
+      ip: wazuh.manager
 
   dashboard:
     - name: wazuh.dashboard

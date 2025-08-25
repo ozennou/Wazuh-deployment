@@ -5,9 +5,11 @@ networks:
     driver: overlay
 
 services:
-  wazuh.indexer:
+  wazuh-indexer:
     image: wazuh/wazuh-indexer:4.12.0
     hostname: wazuh.indexer
+    networks:
+      - wazuh-overlay
     ports:
       - "9200:9200"
     environment:
@@ -23,3 +25,149 @@ services:
       replicas: 1
       restart_policy:
         condition: any
+    configs:
+      - source: root_ca
+        target: /usr/share/wazuh-indexer/certs/root-ca.pem
+      - source: indexer_key
+        target: /usr/share/wazuh-indexer/certs/wazuh.indexer.key
+      - source: indexer_cert
+        target: /usr/share/wazuh-indexer/certs/wazuh.indexer.pem
+      - source: admin_cert
+        target: /usr/share/wazuh-indexer/certs/admin.pem
+      - source: admin_key
+        target: /usr/share/wazuh-indexer/certs/admin-key.pem
+      - source: wazuh_indexer_yml
+        target: /usr/share/wazuh-indexer/opensearch.yml
+      - source: internal_users_yml
+        target: /usr/share/wazuh-indexer/opensearch-security/internal_users.yml
+    # volumes:
+    #   - wazuh-indexer-data:/var/lib/wazuh-indexer #ril
+
+  wazuh-manager:
+    image: wazuh/wazuh-manager:4.12.0
+    hostname: wazuh.manager
+    networks:
+      - wazuh-overlay
+    depends_on:
+      - wazuh-indexer
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 655360
+        hard: 655360
+    ports:
+      - "1514:1514"
+      - "1515:1515"
+      - "514:514/udp"
+      - "55000:55000"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+    environment:
+      - INDEXER_URL=https://wazuh.indexer:9200
+      - INDEXER_USERNAME=admin
+      - INDEXER_PASSWORD=SecretPassword
+      - FILEBEAT_SSL_VERIFICATION_MODE=full
+      - SSL_CERTIFICATE_AUTHORITIES=/etc/ssl/root-ca.pem
+      - SSL_CERTIFICATE=/etc/ssl/filebeat.pem
+      - SSL_KEY=/etc/ssl/filebeat.key
+      - API_USERNAME=wazuh-wui
+      - API_PASSWORD=MyS3cr37P450r.*-
+    # volumes:
+    #   - wazuh-manager-ossec:/var/ossec
+    #   - filebeat_etc:/etc/filebeat
+    #   - filebeat_var:/var/lib/filebeat #ril
+    configs:
+      - source: root_ca_manager
+        target: /etc/ssl/root-ca.pem
+      - source: manager_cert
+        target: /etc/ssl/filebeat.pem
+      - source: manager_key
+        target: /etc/ssl/filebeat.key
+      - source: wazuh_manager_conf
+        target: /wazuh-config-mount/etc/ossec.conf
+
+  wazuh-dashboard:
+    image: wazuh/wazuh-dashboard:4.12.0
+    hostname: wazuh.dashboard
+    depends_on:
+      - wazuh-indexer
+    ports:
+      - 443:5601
+    networks:
+      - wazuh-overlay
+    environment:
+      - INDEXER_USERNAME=admin
+      - INDEXER_PASSWORD=SecretPassword
+      - WAZUH_API_URL=https://wazuh.manager
+      - DASHBOARD_USERNAME=kibanaserver
+      - DASHBOARD_PASSWORD=kibanaserver
+      - API_USERNAME=wazuh-wui
+      - API_PASSWORD=MyS3cr37P450r.*-
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+    # volumes:
+    #   - wazuh-dashboard-config:/usr/share/wazuh-dashboard/data/wazuh/config
+    #   - wazuh-dashboard-custom:/usr/share/wazuh-dashboard/plugins/wazuh/public/assets/custom #ril
+    configs:
+      - source: wazuh_dashboard_cert
+        target: /usr/share/wazuh-dashboard/certs/wazuh-dashboard.pem
+      - source: wazuh_dashboard_key
+        target: /usr/share/wazuh-dashboard/certs/wazuh-dashboard-key.pem
+      - source: wazuh_root_ca
+        target: /usr/share/wazuh-dashboard/certs/root-ca.pem
+      - source: opensearch_dashboards_yml
+        target: /usr/share/wazuh-dashboard/config/opensearch_dashboards.yml
+      - source: wazuh_yml
+        target: /usr/share/wazuh-dashboard/data/wazuh/config/wazuh.yml
+
+
+volumes:
+  wazuh-indexer-data:
+  wazuh-manager-ossec:
+  filebeat_etc:
+  filebeat_var:
+  wazuh-dashboard-config:
+  wazuh-dashboard-custom:
+
+configs:
+  root_ca:
+    file: ./security/tls/wazuh_ssl_certs/root-ca.pem
+  ## indexer
+  indexer_key:
+    file: ./security/tls/wazuh_ssl_certs/wazuh.indexer-key.pem
+  indexer_cert:
+    file: ./security/tls/wazuh_ssl_certs/wazuh.indexer.pem
+  admin_cert:
+    file: ./security/tls/wazuh_ssl_certs/admin.pem
+  admin_key:
+    file: ./security/tls/wazuh_ssl_certs/admin-key.pem
+  wazuh_indexer_yml:
+    file: ./config/wazuh_indexer/wazuh.indexer.yml
+  internal_users_yml:
+    file: ./config/wazuh_indexer/internal_users.yml
+  ## manager
+  root_ca_manager:
+    file: ./security/tls/wazuh_ssl_certs/root-ca-manager.pem
+  manager_cert:
+    file: ./security/tls/wazuh_ssl_certs/wazuh.manager.pem
+  manager_key:
+    file: ./security/tls/wazuh_ssl_certs/wazuh.manager-key.pem
+  wazuh_manager_conf:
+    file: ./config/wazuh_manager/wazuh_manager.conf
+  ## dashboard
+  wazuh_dashboard_cert:
+    file: ./security/tls/wazuh_ssl_certs/wazuh.dashboard.pem
+  wazuh_dashboard_key:
+    file: ./security/tls/wazuh_ssl_certs/wazuh.dashboard-key.pem
+  wazuh_root_ca:
+    file: ./security/tls/wazuh_ssl_certs/root-ca.pem
+  opensearch_dashboards_yml:
+    file: ./config/wazuh_dashboard/opensearch_dashboards.yml
+  wazuh_yml:
+    file: ./config/wazuh_dashboard/wazuh.yml

@@ -14,3 +14,7 @@ nodes:
   dashboard:
     - name: wazuh.dashboard
       ip: wazuh.dashboard
+
+  nginx:
+    - name: nginx
+      ip: nginx

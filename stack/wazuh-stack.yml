@@ -5,13 +5,38 @@ networks:
     driver: overlay
 
 services:
+  nginx:
+    image: nginx:mainline-alpine3.22
+    hostname: nginx
+    networks:
+      - wazuh-overlay
+    ports:
+      - "443:443"
+    depends_on:
+      - wazuh-dashboard
+    configs:
+      - source: nginx_config
+        target: /etc/nginx/nginx.conf
+      - source: nginx_cert
+        target: /etc/ssl/certs/nginx.crt
+      - source: nginx_key
+        target: /etc/ssl/private/nginx.key
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: any
+
+
   wazuh-indexer:
     image: wazuh/wazuh-indexer:4.12.0
     hostname: wazuh.indexer
     networks:
       - wazuh-overlay
-    ports:
-      - "9200:9200"
+    # ports:
+    #   - "9200:9200"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
     ulimits:
@@ -141,11 +166,11 @@ services:
 
   wazuh-dashboard:
     image: wazuh/wazuh-dashboard:4.12.0
-    hostname: wazuh.dashboard
+    hostname: wazuh{{.Task.Slot}}.dashboard
     depends_on:
       - wazuh-indexer
-    ports:
-      - 443:5601
+    # ports:
+    #   - 443:5601
     networks:
       - wazuh-overlay
     environment:
@@ -157,7 +182,7 @@ services:
       - API_USERNAME=wazuh-wui
       - API_PASSWORD=MyS3cr37P450r.*-
     deploy:
-      replicas: 1
+      replicas: 2
       placement:
         constraints:
           - 'node.role == worker'
@@ -233,3 +258,10 @@ configs:
     file: ./config/wazuh_dashboard/opensearch_dashboards.yml
   wazuh_yml:
     file: ./config/wazuh_dashboard/wazuh.yml
+  ## nginx
+  nginx_config:
+    file: ./config/nginx/nginx.conf
+  nginx_cert:
+    file: ./security/tls/wazuh_ssl_certs/nginx.crt
+  nginx_key:
+    file: ./security/tls/wazuh_ssl_certs/nginx.key

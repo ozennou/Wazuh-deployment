@@ -185,6 +185,7 @@ resource "azurerm_linux_virtual_machine" "worker" {
   provisioner "remote-exec" {
     inline = [
       "curl -fsSL https://get.docker.com | sh",
+      "pip3 install jsondiff",
       "sudo sysctl -w vm.max_map_count=262144" #Increase max_map_count for Wazuh indexer to work properly
     ]
 

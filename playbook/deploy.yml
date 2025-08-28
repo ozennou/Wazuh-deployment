@@ -23,9 +23,9 @@
     - name: generate self signed certificates
       command: bash ./stack/security/tls/certs-generator.sh
 
-    # - name: Deploy Wazuh stack
-    #   docker_stack:
-    #     name: wazuh-stack
-    #     compose:
-    #       - ./stack/wazuh-stack.yml
-    #     state: present
+    - name: Deploy Wazuh stack
+      docker_stack:
+        name: wazuh-stack
+        compose:
+          - ./stack/wazuh-stack.yml
+        state: present

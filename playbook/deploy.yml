@@ -1,5 +1,7 @@
 - name: wazuh deployment
   hosts: swarm-cluster
+  vars_files:
+    - ../group_vars/secrets.yml
   become: yes
   tasks:
     - name: verify docker swarm
@@ -29,3 +31,10 @@
         compose:
           - ./stack/wazuh-stack.yml
         state: present
+      environment:
+        DASHBOARD_USERNAME: "{{ DASHBOARD_USERNAME }}"
+        DASHBOARD_PASSWORD: "{{ DASHBOARD_PASSWORD }}"
+        INDEXER_USERNAME: "{{ INDEXER_USERNAME }}"
+        INDEXER_PASSWORD: "{{ INDEXER_PASSWORD }}"
+        API_USERNAME: "{{ API_USERNAME }}"
+        API_PASSWORD: "{{ API_PASSWORD }}"

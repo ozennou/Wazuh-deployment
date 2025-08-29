@@ -1,0 +1,15 @@
+name: Deploy Wazuh Stack
+
+on:
+  push:
+    branches: [ main, tmp ] #ril
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: 
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5

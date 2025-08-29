@@ -44,6 +44,9 @@
     - name: move chromedriver
       command: mv /tmp/chromedriver /usr/bin/chromedriver
 
+    - name: install bcrypt-tool
+      command: snap install bcrypt-tool
+
     - name: Download GitHub Actions runner
       get_url:
         url: https://github.com/actions/runner/releases/download/v2.328.0/actions-runner-linux-x64-2.328.0.tar.gz

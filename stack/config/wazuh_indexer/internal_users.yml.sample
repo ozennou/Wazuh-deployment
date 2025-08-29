@@ -1,0 +1,19 @@
+---
+# This is the internal user database
+# The hash value is a bcrypt hash and can be generated with plugin/tools/hash.sh
+
+_meta:
+  type: "internalusers"
+  config_version: 2
+
+admin:
+  hash: "${INDEXER_PASSWORD_HASH}"
+  reserved: true
+  backend_roles:
+  - "admin"
+  description: "admin user"
+
+kibanaserver:
+  hash: "${DASHBOARD_PASSWORD_HASH}"
+  reserved: true
+  description: "kibanaserver user"

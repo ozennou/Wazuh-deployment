@@ -26,3 +26,5 @@ infra-github-runner/inventory.ini
 wazuh_ssl_certs
 stack/config/wazuh_indexer/internal_users.yml
 secrets.yml
+test.sh
+inventory.ini

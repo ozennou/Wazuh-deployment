@@ -1,0 +1,3 @@
+[swarm-cluster]
+manager ansible_host=${DOCKER_SWARM_MASTER_IP} ansible_user=${TF_VAR_ssh_username} ansible_ssh_common_args='-o StrictHostKeyChecking=no' #ril#ansible_ssh_private_key_file=${TF_VAR_ssh_private_key_file}
+#ril

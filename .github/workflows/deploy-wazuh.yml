@@ -58,6 +58,11 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ env.DOCKER_SWARM_MASTER_IP }} >> ~/.ssh/known_hosts
 
+      - name: Test SSH connection
+        run: |
+          echo "Testing SSH connection to ${{ env.DOCKER_SWARM_MASTER_IP }}"
+          ssh -o ConnectTimeout=10 ${{ env.TF_VAR_ssh_username }}@${{ env.DOCKER_SWARM_MASTER_IP }} "echo 'SSH connection successful'"
+
       - name: render templates
         run: |
           export INDEXER_PASSWORD_HASH=$(bcrypt-tool hash ${INDEXER_PASSWORD})

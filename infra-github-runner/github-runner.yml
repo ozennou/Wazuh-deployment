@@ -32,12 +32,12 @@
 
     - name: Download chromedriver.zip
       get_url:
-        url: https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
-        dest: /tmp/chromedriver_linux64.zip
+        url: https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.154/linux64/chromedriver-linux64.zip
+        dest: /tmp/chromedriver-linux64.zip
 
     - name: unzip the chromedriver.zip
       unarchive:
-        src: /tmp/chromedriver_linux64.zip
+        src: /tmp/chromedriver-linux64.zip
         dest: /tmp/
         remote_src: yes
 

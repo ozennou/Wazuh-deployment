@@ -14,7 +14,6 @@ env:
 jobs:
   scan:
     runs-on: self-hosted
-    continue-on-error: true
     steps:
       - name: test
         run: echo $WAZUH_VERSION ${NGINX_VERSION}
@@ -27,9 +26,12 @@ jobs:
 
       - name: scan wazuh dashboard image
         run: trivy image wazuh/wazuh-dashboard:$WAZUH_VERSION --exit-code 1 --severity HIGH,CRITICAL
+        continue-on-error: true
 
       - name: scan wazuh manager image
         run: trivy image wazuh/wazuh-manager:$WAZUH_VERSION --exit-code 1 --severity HIGH,CRITICAL
+        continue-on-error: true
 
       - name: scan wazuh indexer image
         run: trivy image wazuh/wazuh-indexer:$WAZUH_VERSION --exit-code 1 --severity HIGH,CRITICAL
+        continue-on-error: true

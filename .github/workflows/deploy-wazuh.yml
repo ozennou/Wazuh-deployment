@@ -16,6 +16,9 @@ jobs:
     runs-on: self-hosted
     continue-on-error: true
     steps:
+      - name: test
+        run: echo $WAZUH_VERSION ${NGINX_VERSION}
+
       - name: update trivy vulnerability database
         run: trivy image --download-db-only
 

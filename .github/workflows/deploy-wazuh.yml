@@ -16,13 +16,13 @@ jobs:
         run: trivy image --download-db-only
 
       - name: scan nginx image
-        run: trivy image nginx:${{ vars.NGINX_VERSION }} --exit-code 1 --severity HIGH,CRITICAL
+        run: trivy image nginx:${NGINX_VERSION} --exit-code 1 --severity HIGH,CRITICAL
 
       - name: scan wazuh dashboard image
-        run: trivy image wazuh/wazuh-dashboard:${{ vars.WAZUH_VERSION }} --exit-code 1 --severity HIGH,CRITICAL
+        run: trivy image wazuh/wazuh-dashboard:${WAZUH_VERSION} --exit-code 1 --severity HIGH,CRITICAL
 
       - name: scan wazuh manager image
-        run: trivy image wazuh/wazuh-manager:${{ vars.WAZUH_VERSION }} --exit-code 1 --severity HIGH,CRITICAL
+        run: trivy image wazuh/wazuh-manager:${WAZUH_VERSION} --exit-code 1 --severity HIGH,CRITICAL
 
       - name: scan wazuh indexer image
-        run: trivy image wazuh/wazuh-indexer:${{ vars.WAZUH_VERSION }} --exit-code 1 --severity HIGH,CRITICAL
+        run: trivy image wazuh/wazuh-indexer:${WAZUH_VERSION} --exit-code 1 --severity HIGH,CRITICAL

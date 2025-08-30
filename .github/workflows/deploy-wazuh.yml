@@ -35,6 +35,7 @@ jobs:
 
   deploy:
     runs-on: self-hosted
+    needs: scan
     env:
       TF_VAR_ssh_private_key_file: ${{ secrets.TF_VAR_ssh_private_key_file }}
       ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
@@ -49,6 +50,13 @@ jobs:
       TF_VAR_ssh_username: ${{ vars.TF_VAR_ssh_username }}
     steps:
       - uses: actions/checkout@v5
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ env.DOCKER_SWARM_MASTER_IP }} >> ~/.ssh/known_hosts
 
       - name: render templates
         run: |

@@ -51,18 +51,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ env.DOCKER_SWARM_MASTER_IP }} >> ~/.ssh/known_hosts
-
-      - name: Test SSH connection
-        run: |
-          echo "Testing SSH connection to ${{ env.DOCKER_SWARM_MASTER_IP }}"
-          ssh -o ConnectTimeout=10 ${{ env.TF_VAR_ssh_username }}@${{ env.DOCKER_SWARM_MASTER_IP }} "echo 'SSH connection successful'"
-
       - name: render templates
         run: |
           export INDEXER_PASSWORD_HASH=$(bcrypt-tool hash ${INDEXER_PASSWORD})
@@ -75,7 +63,10 @@ jobs:
       - name: encrypt ansible vault secrets
         run: echo "${ANSIBLE_VAULT_PASSWORD}" | ansible-vault encrypt group_vars/secrets.yml --vault-password-file=/bin/cat
 
-      - name: remove wazuh stack deployment for swarm cluster
+      - name: remove wazuh stack deployment from swarm cluster
         run: ansible-playbook -i inventories/inventory.ini playbook/teardown.yml
+
+      - name: deploy wazuh stack in swarm cluster
+        run: echo "${ANSIBLE_VAULT_PASSWORD}" | ansible-playbook -i inventories/inventory.ini playbook/deploy.yml --vault-password-file=/bin/cat
 
       

@@ -48,6 +48,8 @@ jobs:
       DOCKER_SWARM_MASTER_IP: ${{ vars.DOCKER_SWARM_MASTER_IP }}
       TF_VAR_ssh_username: ${{ vars.TF_VAR_ssh_username }}
     steps:
+      - uses: actions/checkout@v5
+
       - name: render templates
         run: |
           export INDEXER_PASSWORD_HASH=$(bcrypt-tool hash ${INDEXER_PASSWORD})

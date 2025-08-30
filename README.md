@@ -12,8 +12,8 @@ Deployment of Wazuh stack in docker swarm cluster using Terraform, Ansible and G
     - Wazuh manager: clustered deployment (master/worker).
     - Wazuh indexer (I’m facing multiple issues configuring ≥3 data nodes, and due to limited time I’m skipping it).
     - Nginx as reverse proxy & load balancer for Wazuh dasboard replicas.
-- [x] Add health probe (docker healthchecks) for wazuh stack(indexer, manager & dashboard) and nginx. 
 - [x] Configure generator script for generating self signed certificates for Wazuh stack and Nginx.
+- [x] Add health probe (docker healthchecks) for wazuh stack(indexer, manager & dashboard) and nginx. 
 - [x] Develop Ansible playbook:
     - playbooks/deploy.yml:
         - ensure that docker swarm is initialized and list the nodes.

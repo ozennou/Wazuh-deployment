@@ -15,9 +15,6 @@ jobs:
   scan:
     runs-on: self-hosted
     steps:
-      - name: test
-        run: echo $WAZUH_VERSION ${NGINX_VERSION}
-
       - name: update trivy vulnerability database
         run: trivy image --download-db-only
 
@@ -35,3 +32,20 @@ jobs:
       - name: scan wazuh indexer image
         run: trivy image wazuh/wazuh-indexer:$WAZUH_VERSION --exit-code 1 --severity HIGH,CRITICAL
         continue-on-error: true
+
+  # deploy:
+  #   runs-on: self-hosted
+  #   env:
+  #     TF_VAR_ssh_private_key_file: ${{ secrets.TF_VAR_ssh_private_key_file }}
+  #     ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+  #     DASHBOARD_USERNAME: ${{ secrets.DASHBOARD_USERNAME }}
+  #     DASHBOARD_PASSWORD: ${{ secrets.DASHBOARD_PASSWORD }}
+  #     INDEXER_USERNAME: ${{ secrets.INDEXER_USERNAME }}
+  #     INDEXER_PASSWORD: ${{ secrets.INDEXER_PASSWORD }}
+  #     API_USERNAME: ${{ secrets.API_USERNAME }}
+  #     API_PASSWORD: ${{ secrets.API_PASSWORD }}
+
+  #     DOCKER_SWARM_MASTER_IP: ${{ vars.DOCKER_SWARM_MASTER_IP }}
+  #     TF_VAR_ssh_username: ${{ vars.TF_VAR_ssh_username }}
+
+      

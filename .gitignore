@@ -27,4 +27,5 @@ wazuh_ssl_certs
 stack/config/wazuh_indexer/internal_users.yml
 secrets.yml
 test.sh
-inventory.ini
+inventories/inventory.ini
+inventories/inventory.ini

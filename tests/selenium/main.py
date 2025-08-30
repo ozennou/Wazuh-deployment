@@ -5,11 +5,13 @@ import os
 
 def main():
     try:
-        page = f'https://{os.gerenv("DOCKER_SWARM_MASTER_IP")}/'
+        page = f'https://google.com/'
+        # page = f'https://{os.getenv("DOCKER_SWARM_MASTER_IP")}/'
         path = "/usr/bin/chromedriver"
+        # path = "C:\Users\a939950\Downloads\chromedriver_win32\chromedriver.exe"
 
         options = Options()
-        # options.add_argument('--headless=new')
+        options.add_argument('--headless=new')
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument('--ignore-certificate-errors')
         options.add_argument('--allow-insecure-localhost')

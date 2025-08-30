@@ -50,9 +50,11 @@ jobs:
     steps:
       - name: render templates
         run: |
+          export INDEXER_PASSWORD_HASH=$(bcrypt-tool hash ${INDEXER_PASSWORD})
+          export DASHBOARD_PASSWORD_HASH=$(bcrypt-tool hash ${DASHBOARD_PASSWORD})
+
           cat group_vars/secrets.yml.sample | envsubst  > group_vars/secrets.yml
           cat inventories/inventory.ini.sample | envsubst > inventories/inventory.ini
           cat stack/config/wazuh_indexer/internal_users.yml.sample | envsubst > stack/config/wazuh_indexer/internal_users.yml
-          cat inventories/inventory.ini
 
       

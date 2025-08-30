@@ -59,4 +59,10 @@ jobs:
           cat inventories/inventory.ini.sample | envsubst > inventories/inventory.ini
           cat stack/config/wazuh_indexer/internal_users.yml.sample | envsubst > stack/config/wazuh_indexer/internal_users.yml
 
+      - name: encrypt ansible vault secrets
+        run: echo "${ANSIBLE_VAULT_PASSWORD}" | ansible-vault encrypt group_vars/secrets.yml --vault-password-file=/bin/cat
+
+      - name: remove wazuh stack deployment for swarm cluster
+        run: ansible-playbook -i inventories/inventory.ini playbook/teardown.yml
+
       

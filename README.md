@@ -1,10 +1,16 @@
 # Wazuh-deployment-challenge
 Deployment of Wazuh stack in docker swarm cluster using Ansible and Github Actions.
 
+## Table of Contents
+- [Completed Tasks](#completed-tasks)
+- [Architecture](#wazuh-deployment-architecture)
+- [Prerequisites](#prerequisites)
+- [Screenshots](#screenshots)
+
 > [!NOTE]  
 > I’d like to inform you that I included some additional topics beyond the main subject, example of infra directories, because I believe they add value to the challenge. Thank you for your understanding.
 
-### Completed Tasks
+## Completed Tasks
 - [x] Infrastructure for Github self-hosted runner in Azure using Terraform & Ansible (additional).
 - [x] Infrastructure for docker swarm cluster with multiple masters & workers in Azure using Terraform (additional + bonus).
 - [x] Configure Wazuh stack multi node(with bonus):
@@ -32,7 +38,7 @@ Deployment of Wazuh stack in docker swarm cluster using Ansible and Github Actio
     - testing health probe of the front-end api.
     - post-deployment testing using python script with selenium webdriver.
     
-### Wazuh deployment architecture
+## Wazuh deployment architecture
 In the diagram you will see the global architecture that I design, I use Terraform & Ansible to provision and configure both of Github self-hosted runner and Docker swarm cluster in Azure, using Ansible I configure the runner with required packages (ansible, trivy...), And also configure docker swarm cluster that composed of tree masters nodes and tree worker nodes that share the same azure virtual network for the communication:
 
 ![diagram-1](imgs/diagram-1.png)
@@ -47,7 +53,7 @@ finally the architecture of Wazuh stack that run in the previous docker swarm cl
 
     ![diagram-3](imgs/diagram-3.png)
 
-### Prerequisites
+## Prerequisites
 - provision and configure the infrastructure:
     - Github Action self-hosted runner in Azure [README.md](infra-github-runner/README.md)
     - Docker swarm cluster in Azure [README.md](infra-docker-swarm-cluster/README.md)
@@ -90,7 +96,7 @@ finally the architecture of Wazuh stack that run in the previous docker swarm cl
     ansible-playbook -i inventories/inventory.ini playbook/teardown.yml
     ```
 
-### Screen shots
+## Screenshots
 - Docker swarm cluster nodes:
 
     ![swarm-cluster](imgs/docker-swarm-nodes.png)

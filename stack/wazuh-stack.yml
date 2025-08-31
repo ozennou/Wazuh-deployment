@@ -137,6 +137,10 @@ services:
         target: /etc/ssl/filebeat.key
       - source: wazuh_manager_conf
         target: /wazuh-config-mount/etc/ossec.conf
+      - source: wazuh_local_rules
+        target: /wazuh-config-mount/etc/rules/local_rules.xml
+      - source: wazuh_known_users
+        target: /wazuh-config-mount/etc/lists/known_users
 
   wazuh-worker:
     image: wazuh/wazuh-manager:${WAZUH_VERSION}
@@ -186,6 +190,10 @@ services:
         target: /etc/ssl/filebeat.key
       - source: wazuh_worker_conf
         target: /wazuh-config-mount/etc/ossec.conf
+      - source: wazuh_local_rules
+        target: /wazuh-config-mount/etc/rules/local_rules.xml
+      - source: wazuh_known_users
+        target: /wazuh-config-mount/etc/lists/known_users
 
   wazuh-dashboard:
     image: wazuh/wazuh-dashboard:${WAZUH_VERSION}
@@ -267,6 +275,10 @@ configs:
     file: ./security/tls/wazuh_ssl_certs/wazuh.master-key.pem
   wazuh_manager_conf:
     file: ./config/wazuh_manager/wazuh_manager.conf
+  wazuh_local_rules:
+    file: ./config/wazuh_manager/local_rules.xml
+  wazuh_known_users:
+    file: ./config/wazuh_manager/known_users
   ## manager worker
   wazuh_worker_cert:
     file: ./security/tls/wazuh_ssl_certs/wazuh.worker.pem

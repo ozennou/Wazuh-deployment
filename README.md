@@ -33,9 +33,9 @@ Deployment of Wazuh stack in docker swarm cluster using Ansible and Github Actio
     - authenticate with a non-admin user and check the login form and landing page elements.
 - [x] Configure Github Actions workflow for:
     - scan the docker image used in wazuh stack & nginx using Trivy.
-    - performe a linting check using yamllint.
+    - performe a linting check using yamllint.(bonus)
     - deploy wazuh stack to docker swarm cluster using ansible playbook and save the secret in github encrypted secret + ansible vault.
-    - testing health probe of the front-end api.
+    - testing health probe of the front-end api.(bonus)
     - post-deployment testing using python script with selenium webdriver.
     
 ## Wazuh deployment architecture

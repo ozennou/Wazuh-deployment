@@ -10,7 +10,7 @@
         name: "{{ item }}"
         state: present
         update_cache: yes
-      loop: [unzip, ansible-core]
+      loop: [unzip, ansible-core, yamllint]
 
     - name: Install Docker
       shell: |

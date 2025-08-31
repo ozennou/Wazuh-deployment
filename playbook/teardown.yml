@@ -1,0 +1,8 @@
+- name: wazuh clean up
+  hosts: swarm-cluster
+  become: yes
+  tasks:
+    - name: remove Wazuh stack deployment
+      docker_stack:
+        name: wazuh-stack
+        state: absent

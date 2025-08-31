@@ -22,7 +22,7 @@ resource "azurerm_subnet" "worker" {
   name                 = "${var.name_prefix}-worker-subnet"
   resource_group_name  = azurerm_resource_group.default.name
   virtual_network_name = azurerm_virtual_network.default.name
-  address_prefixes     = ["10.0.0.0/24"]
+  address_prefixes     = ["10.0.1.0/24"]
 }
 
 resource "azurerm_public_ip" "master" {
@@ -65,7 +65,7 @@ resource "azurerm_network_security_group" "default" {
     priority                   = 110
     direction                  = "Inbound"
     access                     = "Allow"
-    protocol                   = "Tcp"
+    protocol                   = "*"
     source_port_range          = "*"
     destination_port_range     = "443"
     source_address_prefix      = "*"
@@ -143,7 +143,10 @@ resource "azurerm_linux_virtual_machine" "master" {
   provisioner "remote-exec" {
     inline = [
       "curl -fsSL https://get.docker.com | sh",
-      "sudo sysctl -w vm.max_map_count=262144" #Increase max_map_count for Wazuh indexer to work properly
+      "sudo apt install python3-pip -y",
+      "sudo pip3 install jsondiff",
+      "echo 'vm.max_map_count=262144' | sudo tee /etc/sysctl.d/99-wazuh.conf",
+      "sudo sysctl --system"  #Increase max_map_count for Wazuh indexer to work properly
     ]
 
     connection {
@@ -185,6 +188,7 @@ resource "azurerm_linux_virtual_machine" "worker" {
   provisioner "remote-exec" {
     inline = [
       "curl -fsSL https://get.docker.com | sh",
+      "pip3 install jsondiff",
       "sudo sysctl -w vm.max_map_count=262144" #Increase max_map_count for Wazuh indexer to work properly
     ]
 

@@ -1,0 +1,45 @@
+- name: wazuh deployment
+  hosts: swarm-cluster
+  vars_files:
+    - ../group_vars/secrets.yml
+  vars:
+    WAZUH_VERSION: "{{ lookup('env', 'WAZUH_VERSION') }}"
+    NGINX_VERSION: "{{ lookup('env', 'NGINX_VERSION') }}"
+  become: yes
+  tasks:
+    - name: verify docker swarm
+      shell: |
+        docker info | grep -q "Swarm: active"
+        docker node ls
+      register: swarm_status
+
+    - name: print output
+      debug:
+        var: swarm_status.stdout_lines
+
+    - name: copy wazuh stack deployment source code
+      copy:
+        src: ../stack/
+        dest: /home/mozennou/stack/
+        owner: mozennou
+        group: mozennou
+        mode: '0755'
+
+    - name: generate self signed certificates
+      command: bash ./stack/security/tls/certs-generator.sh
+
+    - name: Deploy Wazuh stack
+      docker_stack:
+        name: wazuh-stack
+        compose:
+          - ./stack/wazuh-stack.yml
+        state: present
+      environment:
+        NGINX_VERSION: "{{ NGINX_VERSION }}"
+        WAZUH_VERSION: "{{ WAZUH_VERSION }}"
+        DASHBOARD_USERNAME: "{{ DASHBOARD_USERNAME }}"
+        DASHBOARD_PASSWORD: "{{ DASHBOARD_PASSWORD }}"
+        INDEXER_USERNAME: "{{ INDEXER_USERNAME }}"
+        INDEXER_PASSWORD: "{{ INDEXER_PASSWORD }}"
+        API_USERNAME: "{{ API_USERNAME }}"
+        API_PASSWORD: "{{ API_PASSWORD }}"

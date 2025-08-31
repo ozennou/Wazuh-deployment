@@ -1,0 +1,104 @@
+name: Deploy Wazuh Stack
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.png'
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.png'
+  workflow_dispatch: 
+
+env:
+  DOCKER_SWARM_MASTER_IP: ${{ vars.DOCKER_SWARM_MASTER_IP }}
+  TF_VAR_ssh_username: ${{ vars.TF_VAR_ssh_username }}
+  NGINX_VERSION: ${{ vars.NGINX_VERSION }}
+  WAZUH_VERSION: ${{ vars.WAZUH_VERSION }}
+
+  DASHBOARD_USERNAME: ${{ secrets.DASHBOARD_USERNAME }}
+  DASHBOARD_PASSWORD: ${{ secrets.DASHBOARD_PASSWORD }}
+
+jobs:
+  scan:
+    runs-on: self-hosted
+    steps:
+      - name: update trivy vulnerability database
+        run: trivy image --download-db-only
+
+      - name: scan nginx image
+        run: trivy image nginx:$NGINX_VERSION --exit-code 1 --severity HIGH,CRITICAL
+
+      - name: scan wazuh dashboard image
+        run: trivy image wazuh/wazuh-dashboard:$WAZUH_VERSION --exit-code 1 --severity HIGH,CRITICAL
+        continue-on-error: true
+
+      - name: scan wazuh manager image
+        run: trivy image wazuh/wazuh-manager:$WAZUH_VERSION --exit-code 1 --severity HIGH,CRITICAL
+        continue-on-error: true
+
+      - name: scan wazuh indexer image
+        run: trivy image wazuh/wazuh-indexer:$WAZUH_VERSION --exit-code 1 --severity HIGH,CRITICAL
+        continue-on-error: true
+
+  linting:
+    runs-on: self-hosted
+    needs: scan
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: run yamllint test
+        run: |
+          shopt -s globstar
+          yamllint **/*.yml
+        continue-on-error: true
+  deploy:
+    runs-on: self-hosted
+    needs: linting
+    env:
+      TF_VAR_ssh_private_key_file: ${{ secrets.TF_VAR_ssh_private_key_file }}
+      ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+      INDEXER_USERNAME: ${{ secrets.INDEXER_USERNAME }}
+      INDEXER_PASSWORD: ${{ secrets.INDEXER_PASSWORD }}
+      API_USERNAME: ${{ secrets.API_USERNAME }}
+      API_PASSWORD: ${{ secrets.API_PASSWORD }}
+    steps:
+      - name: render templates
+        run: |
+          export INDEXER_PASSWORD_HASH=$(bcrypt-tool hash ${INDEXER_PASSWORD})
+          export DASHBOARD_PASSWORD_HASH=$(bcrypt-tool hash ${DASHBOARD_PASSWORD})
+
+          cat group_vars/secrets.yml.sample | envsubst  > group_vars/secrets.yml
+          cat inventories/inventory.ini.sample | envsubst > inventories/inventory.ini
+          cat stack/config/wazuh_indexer/internal_users.yml.sample | envsubst > stack/config/wazuh_indexer/internal_users.yml
+
+      - name: encrypt ansible vault secrets
+        run: echo "${ANSIBLE_VAULT_PASSWORD}" | ansible-vault encrypt group_vars/secrets.yml --vault-password-file=/bin/cat
+
+      - name: remove wazuh stack deployment from swarm cluster
+        run: ansible-playbook -i inventories/inventory.ini playbook/teardown.yml
+
+      - name: deploy wazuh stack in swarm cluster
+        run: echo "${ANSIBLE_VAULT_PASSWORD}" | ansible-playbook -i inventories/inventory.ini playbook/deploy.yml --vault-password-file=/bin/cat
+
+      - name: clean up
+        run: |
+          rm -rf group_vars/secrets.yml
+          rm -rf inventories/inventory.ini
+          rm -rf stack/config/wazuh_indexer/internal_users.yml
+
+  testing:
+    runs-on: self-hosted
+    needs: deploy
+    steps:
+      - name: install the required python packages
+        run: python3 -m pip install -r tests/selenium/requirements.txt
+      
+      - name: run python health probe testing
+        run: python3 tests/api/healthcheck.py
+
+      - name: run python selenium testing (non admin user)
+        run: python3 tests/selenium/main.py

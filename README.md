@@ -27,6 +27,7 @@ Deployment of Wazuh stack in docker swarm cluster using Ansible and Github Actio
     - authenticate with a non-admin user and check the login form and landing page elements.
 - [x] Configure Github Actions workflow for:
     - scan the docker image used in wazuh stack & nginx using Trivy.
+    - performe a linting check using yamllint.
     - deploy wazuh stack to docker swarm cluster using ansible playbook and save the secret in github encrypted secret + ansible vault.
     - testing health probe of the front-end api.
     - post-deployment testing using python script with selenium webdriver.
@@ -43,3 +44,45 @@ finally the architecture of Wazuh stack that run in the previous docker swarm cl
 - Nginx as reverse proxy & load balancer for Wazuh dashboard replicas.
 
 ![diagram-3](imgs/diagram-3.png)
+### Prerequisites
+- provision and configure the infrastructure:
+    - Github Action self-hosted runner in Azure [README.md](infra-github-runner/README.md)
+    - Docker swarm cluster in Azure [README.md](infra-docker-swarm-cluster/README.md)
+- setup all the required environment variables:
+    ``` bash
+    export ANSIBLE_VAULT_PASSWORD="<your-ansible-vault-password>"
+
+    export INDEXER_USERNAME="<indexer-username>"
+    export INDEXER_PASSWORD="<indexer-password>"
+
+    export API_USERNAME="<api-username>"
+    export API_PASSWORD="<api-password>"
+
+    export DASHBOARD_USERNAME="<dashboard-username>"
+    export DASHBOARD_PASSWORD="<dashboard-password>"
+
+    export DOCKER_SWARM_MASTER_IP="<docker-swarm-master-ip>"
+    export NGINX_VERSION="<nginx-version>"
+    export WAZUH_VERSION="<wazuh-version>"
+    ```
+- render the templates:
+    ``` bash
+    export INDEXER_PASSWORD_HASH=$(bcrypt-tool hash ${INDEXER_PASSWORD})
+    export DASHBOARD_PASSWORD_HASH=$(bcrypt-tool hash ${DASHBOARD_PASSWORD})
+
+    cat group_vars/secrets.yml.sample | envsubst  > group_vars/secrets.yml
+    cat inventories/inventory.ini.sample | envsubst > inventories/inventory.ini
+    cat stack/config/wazuh_indexer/internal_users.yml.sample | envsubst > stack/config/wazuh_indexer/internal_users.yml
+    ```
+- generate ansible vault encrypted secrets:
+    ``` bash
+    echo "${ANSIBLE_VAULT_PASSWORD}" | ansible-vault encrypt group_vars/secrets.yml --vault-password-file=/bin/cat
+    ```
+- deploy wazuh stack:
+    ``` bash
+    echo "${ANSIBLE_VAULT_PASSWORD}" | ansible-playbook -i inventories/inventory.ini playbook/deploy.yml --vault-password-file=/bin/cat
+    ```
+- finally to remove the deployment:
+    ``` bash
+    ansible-playbook -i inventories/inventory.ini playbook/teardown.yml
+    ```

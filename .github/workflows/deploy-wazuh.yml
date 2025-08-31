@@ -8,6 +8,9 @@ on:
   workflow_dispatch: 
 
 env:
+  DASHBOARD_USERNAME: ${{ secrets.DASHBOARD_USERNAME }}
+  DASHBOARD_PASSWORD: ${{ secrets.DASHBOARD_PASSWORD }}
+
   NGINX_VERSION: ${{ vars.NGINX_VERSION }}
   WAZUH_VERSION: ${{ vars.WAZUH_VERSION }}
 
@@ -39,8 +42,6 @@ jobs:
     env:
       TF_VAR_ssh_private_key_file: ${{ secrets.TF_VAR_ssh_private_key_file }}
       ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
-      DASHBOARD_USERNAME: ${{ secrets.DASHBOARD_USERNAME }}
-      DASHBOARD_PASSWORD: ${{ secrets.DASHBOARD_PASSWORD }}
       INDEXER_USERNAME: ${{ secrets.INDEXER_USERNAME }}
       INDEXER_PASSWORD: ${{ secrets.INDEXER_PASSWORD }}
       API_USERNAME: ${{ secrets.API_USERNAME }}
@@ -69,10 +70,17 @@ jobs:
       - name: deploy wazuh stack in swarm cluster
         run: echo "${ANSIBLE_VAULT_PASSWORD}" | ansible-playbook -i inventories/inventory.ini playbook/deploy.yml --vault-password-file=/bin/cat
 
+  testing:
+    runs-on: self-hosted
+    needs: deploy
+    steps:
+      - uses: actions/checkout@v5
+
       - name: install the required python packages
         run: python3 -m pip install -r tests/selenium/requirements.txt
       
-      - name: run python testing script
-        run: |
-          python3 tests/api/healthcheck.py
-          python3 tests/selenium/main.py
+      - name: run python health probe testing
+        run: python3 tests/api/healthcheck.py
+
+      - name: run python selenium testing (non admin user)
+        run: python3 tests/selenium/main.py

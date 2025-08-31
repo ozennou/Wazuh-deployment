@@ -1,56 +1,54 @@
 <group name="local,sshd,authentication,">
-  
-  <rule id="100001" level="3">
-    <if_sid>5716</if_sid>
-    <regex>from (\S+) port</regex>
-    <description>SSH authentication failure from $(srcip)</description>
+
+  <rule id="100001" level="15">
+    <match>Failed password for invalid user|Failed password for</match>
+    <description>SSH authentication failure detected</description>
     <mitre>
-      <id>T1110.001</id>
+      <id>T1110</id>
     </mitre>
     <group>authentication_failed,</group>
   </rule>
 
-  <rule id="100002" level="8" frequency="3" timeframe="60">
+  <rule id="100002" level="15" frequency="3" timeframe="60">
     <if_matched_sid>100001</if_matched_sid>
     <same_source_ip />
-    <description>SSH brute force: $(frequency) failed attempts from $(srcip)</description>
+    <description>SSH multiple authentication failures from same IP</description>
     <mitre>
-      <id>T1110.001</id>
+      <id>T1110</id>
     </mitre>
-    <group>attacks,brute_force,</group>
+    <group>authentication_failed,brute_force,</group>
   </rule>
 
-  <rule id="100003" level="3">
-    <if_sid>5715</if_sid>
-    <regex>from (\S+) port</regex>
-    <description>SSH successful login: $(user) from $(srcip)</description>
+  <rule id="100003" level="15">
+    <match>Accepted password for</match>
+    <description>SSH successful authentication</description>
     <mitre>
       <id>T1078</id>
     </mitre>
     <group>authentication_success,</group>
   </rule>
 
-  <rule id="100004" level="12" timeframe="300">
+  <rule id="100004" level="15" timeframe="300">
     <if_matched_sid>100002</if_matched_sid>
     <if_matched_sid>100003</if_matched_sid>
     <same_source_ip />
-    <description>CRITICAL: SSH brute force success $(srcip) user $(user)</description>
+    <description>CRITICAL: SSH brute force followed by successful login</description>
     <mitre>
-      <id>T1110.001</id>
+      <id>T1110</id>
       <id>T1078</id>
     </mitre>
-    <group>attacks,brute_force_success,</group>
+    <group>authentication_success,attacks,brute_force_success,</group>
   </rule>
 
   <rule id="100005" level="15" timeframe="300">
     <if_matched_sid>100004</if_matched_sid>
     <list field="user" lookup="not_address_match_key">etc/lists/known_users</list>
-    <description>CRITICAL: SSH brute force with UNKNOWN USER $(user) from $(srcip)</description>
+    <description>CRITICAL: SSH brute force success with unknown user</description>
     <mitre>
-      <id>T1110.001</id>
-      <id>T1078.003</id>
+      <id>T1110</id>
+      <id>T1078</id>
     </mitre>
-    <group>attacks,unknown_user,</group>
+    <group>authentication_success,attacks,unknown_user,</group>
   </rule>
 
 </group>

@@ -1,3 +1,5 @@
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
@@ -8,14 +10,12 @@ import time
 
 def main():
     try:
-        # page = f'https://google.com/'
         page = f'https://{os.getenv("DOCKER_SWARM_MASTER_IP")}/'
         path = "/usr/bin/chromedriver"
-        # path = "C:\Users\a939950\Downloads\chromedriver_win32\chromedriver.exe"
 
         options = Options()
         options.add_argument('--headless=new')
-        options.add_argument("--no-sandbox") #ril
+        options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument('--ignore-certificate-errors')
         options.add_argument('--allow-insecure-localhost')
@@ -28,15 +28,22 @@ def main():
 
         driver.get(page)
 
-        driver.implicitly_wait(1000)
+        driver.implicitly_wait(600)
 
-        test = driver.find_element(By.XPATH, '//input[@placeholder="Username"]').send_keys(f'kibanaserver') #ril
-        print(test)
-        # driver.find_element(By.XPATH, '//input[@placeholder="Password"]').send_keys(f'kibanaserver' + Keys.ENTER)
+        driver.find_element(By.XPATH, '//input[@placeholder="Username"]').send_keys(f'{os.getenv("DASHBOARD_USERNAME")}') #ril
+        driver.find_element(By.XPATH, '//input[@placeholder="Password"]').send_keys(f'{os.getenv("DASHBOARD_PASSWORD")}' + Keys.ENTER)
 
-        # time.sleep(1000)
+        elt = WebDriverWait(driver, 600).until(
+            EC.presence_of_element_located((By.XPATH, "//span[@title='Last 24 hours alerts']"))
+        )
+
+        print("Successfully authenticate to Wazuh \nAll tests passed")
+
     except Exception as e:
         print(f'Error: {e}')
+    finally:
+        driver.close()
+        driver.quit()
 
 if __name__ == "__main__":
     main()

@@ -69,4 +69,10 @@ jobs:
       - name: deploy wazuh stack in swarm cluster
         run: echo "${ANSIBLE_VAULT_PASSWORD}" | ansible-playbook -i inventories/inventory.ini playbook/deploy.yml --vault-password-file=/bin/cat
 
+      - name: install the required python packages
+        run: python3 -m pip install -r tests/selenium/requirements.txt
       
+      - name: run python testing script
+        run: |
+          python3 tests/api/healthcheck.py
+          python3 tests/selenium/main.py

@@ -118,3 +118,11 @@ finally the architecture of Wazuh stack that run in the previous docker swarm cl
 - Test recording of Wazuh in the event of a master or worker swarm node failure:
     [Record link](https://drive.google.com/file/d/18eW1aeX9VF7mHPkGdHjDeK7f-cPQAHOt/view)
     ![Record gif](imgs/recording-gif.gif)
+
+- Screenshot of wazuh manager cluster from the dashboard:
+
+    ![screen-shot](imgs/Screenshot-cluster-nodes.png)
+
+- Screenshot of a configured wazuh agent for a linux machine:
+
+    ![screen-shot](imgs/Screenshot-wazuh-agent.png)

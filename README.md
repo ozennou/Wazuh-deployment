@@ -91,6 +91,10 @@ finally the architecture of Wazuh stack that run in the previous docker swarm cl
     ```
 
 ### Screen shots
+- Docker swarm cluster nodes:
+
+    ![swarm-cluster](imgs/docker-swarm-nodes.png)
+
 - ansible result output:
 
     ![ansible-result](imgs/Screenshot-ansible-result.png)

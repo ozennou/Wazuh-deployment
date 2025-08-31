@@ -78,6 +78,12 @@ jobs:
       - name: deploy wazuh stack in swarm cluster
         run: echo "${ANSIBLE_VAULT_PASSWORD}" | ansible-playbook -i inventories/inventory.ini playbook/deploy.yml --vault-password-file=/bin/cat
 
+      - name: clean up
+        run: |
+          rm -rf group_vars/secrets.yml
+          rm -rf inventories/inventory.ini
+          rm -rf stack/config/wazuh_indexer/internal_users.yml
+
   testing:
     runs-on: self-hosted
     needs: deploy

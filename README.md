@@ -34,7 +34,9 @@ Deployment of Wazuh stack in docker swarm cluster using Ansible and Github Actio
     
 ### Wazuh deployment architecture
 In the diagram you will see the global architecture that I design, I use Terraform & Ansible to provision and configure both of Github self-hosted runner and Docker swarm cluster in Azure, using Ansible I configure the runner with required packages (ansible, trivy...), And also configure docker swarm cluster that composed of tree masters nodes and tree worker nodes that share the same azure virtual network for the communication:
+
 ![diagram-1](imgs/diagram-1.png)
+
 ![diagram-2](imgs/diagram-2.png)
 
 finally the architecture of Wazuh stack that run in the previous docker swarm cluster composed from:
@@ -43,7 +45,8 @@ finally the architecture of Wazuh stack that run in the previous docker swarm cl
 - Wazuh indexer (I’m facing multiple issues configuring ≥3 data nodes, and due to limited time I’m skipping it).
 - Nginx as reverse proxy & load balancer for Wazuh dashboard replicas.
 
-![diagram-3](imgs/diagram-3.png)
+    ![diagram-3](imgs/diagram-3.png)
+
 ### Prerequisites
 - provision and configure the infrastructure:
     - Github Action self-hosted runner in Azure [README.md](infra-github-runner/README.md)
@@ -86,3 +89,20 @@ finally the architecture of Wazuh stack that run in the previous docker swarm cl
     ``` bash
     ansible-playbook -i inventories/inventory.ini playbook/teardown.yml
     ```
+
+### Screen shots
+- ansible result output:
+
+    ![ansible-result](imgs/Screenshot-ansible-result.png)
+
+- python script testing recording with selenium webdriver:
+
+    ![selenium-testing](imgs/python-selenium-testing.gif)
+
+- Github Actions workflow screen shots:
+
+    ![actions-1](imgs/Screenshot-actions-1.png)
+
+    ![actions-2](imgs/Screenshot-actions-2.png)
+
+    ![actions-3](imgs/Screenshot-actions-3.png)

@@ -5,10 +5,12 @@ on:
     branches: [ main, tmp ] #ril
     paths-ignore:
       - '**/*.md'
+      - '**/*.png'
   pull_request:
     branches: [ main ]
     paths-ignore:
       - '**/*.md'
+      - '**/*.png'
   workflow_dispatch: 
 
 env:

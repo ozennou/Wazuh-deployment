@@ -2,7 +2,7 @@ name: Deploy Wazuh Stack
 
 on:
   push:
-    branches: [ main, tmp ] #ril
+    branches: [ main ]
     paths-ignore:
       - '**/*.md'
       - '**/*.png'

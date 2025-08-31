@@ -79,8 +79,8 @@ services:
         target: /usr/share/wazuh-indexer/opensearch.yml
       - source: internal_users_yml
         target: /usr/share/wazuh-indexer/opensearch-security/internal_users.yml
-    # volumes:
-    #   - wazuh-indexer-data:/var/lib/wazuh-indexer #ril
+    volumes:
+      - wazuh-indexer-data:/var/lib/wazuh-indexer #ril
 
   wazuh-manager:
     image: wazuh/wazuh-manager:${WAZUH_VERSION}
@@ -118,10 +118,10 @@ services:
       - SSL_KEY=/etc/ssl/filebeat.key
       - API_USERNAME=${API_USERNAME}
       - API_PASSWORD=${API_PASSWORD}
-    # volumes:
-    #   - wazuh-manager-master-ossec:/var/ossec
-    #   - master-filebeat-etc:/etc/filebeat
-    #   - master-filebeat-var:/var/lib/filebeat #ril
+    volumes:
+      - wazuh-manager-master-ossec:/var/ossec
+      - master-filebeat-etc:/etc/filebeat
+      - master-filebeat-var:/var/lib/filebeat #ril
     healthcheck:
       test: ["CMD-SHELL", "curl -k -u ${API_USERNAME}:${API_PASSWORD} https://localhost:55000/security/user/authenticate | grep -q '\"error\": 0'"]
       interval: 30s
@@ -167,10 +167,10 @@ services:
       - SSL_CERTIFICATE_AUTHORITIES=/etc/ssl/root-ca.pem
       - SSL_CERTIFICATE=/etc/ssl/filebeat.pem
       - SSL_KEY=/etc/ssl/filebeat.key
-    # volumes:
-    #   - wazuh-manager-worker-ossec:/var/ossec
-    #   - worker-filebeat-etc:/etc/filebeat
-    #   - worker-filebeat-var:/var/lib/filebeat #ril
+    volumes:
+      - wazuh-manager-worker-ossec:/var/ossec
+      - worker-filebeat-etc:/etc/filebeat
+      - worker-filebeat-var:/var/lib/filebeat #ril
     healthcheck:
       test: ["CMD-SHELL", "curl -k -u ${API_USERNAME}:${API_PASSWORD} https://localhost:55000/security/user/authenticate | grep -q '\"error\": 0'"]
       interval: 30s
@@ -192,8 +192,6 @@ services:
     hostname: wazuh{{.Task.Slot}}.dashboard
     depends_on:
       - wazuh-indexer
-    # ports:
-    #   - 443:5601
     networks:
       - wazuh-overlay
     environment:
@@ -217,9 +215,9 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    # volumes:
-    #   - wazuh-dashboard-config:/usr/share/wazuh-dashboard/data/wazuh/config
-    #   - wazuh-dashboard-custom:/usr/share/wazuh-dashboard/plugins/wazuh/public/assets/custom #ril
+    volumes:
+      - wazuh-dashboard-config:/usr/share/wazuh-dashboard/data/wazuh/config
+      - wazuh-dashboard-custom:/usr/share/wazuh-dashboard/plugins/wazuh/public/assets/custom #ril
     configs:
       - source: wazuh_dashboard_cert
         target: /usr/share/wazuh-dashboard/certs/wazuh-dashboard.pem

@@ -30,7 +30,7 @@ def main():
 
         driver.implicitly_wait(600)
 
-        driver.find_element(By.XPATH, '//input[@placeholder="Username"]').send_keys(f'{os.getenv("DASHBOARD_USERNAME")}') #ril
+        driver.find_element(By.XPATH, '//input[@placeholder="Username"]').send_keys(f'{os.getenv("DASHBOARD_USERNAME")}')
         driver.find_element(By.XPATH, '//input[@placeholder="Password"]').send_keys(f'{os.getenv("DASHBOARD_PASSWORD")}' + Keys.ENTER)
 
         elt = WebDriverWait(driver, 600).until(

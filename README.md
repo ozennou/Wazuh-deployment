@@ -111,5 +111,3 @@ finally the architecture of Wazuh stack that run in the previous docker swarm cl
 
 - Test recording of Wazuh in the event of a master or worker swarm node failure:
     [Record](imgs/testing-record.mp4)
-
-    ![testing-record](imgs/testing-record.mp4)

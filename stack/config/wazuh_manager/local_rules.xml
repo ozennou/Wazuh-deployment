@@ -1,14 +1,54 @@
-<group name="syslog,attacks,">
-    <rule id="100040" level="5" frequency="3" timeframe="60">
-    <if_group>authentication_failures</if_group>
-    <same_source_ip />
-    <description>Multiple SSH failures from $(srcip)</description>
-    </rule>
+<group name="local,sshd,authentication,">
 
-    <rule id="100041" level="15" timeframe="60">
-    <if_matched_sid>100040</if_matched_sid>
-    <if_group>authentication_success</if_group>
+  <rule id="100001" level="15">
+    <match>Failed password for invalid user|Failed password for</match>
+    <description>SSH authentication failure detected</description>
+    <mitre>
+      <id>T1110</id>
+    </mitre>
+    <group>authentication_failed,</group>
+  </rule>
+
+  <rule id="100002" level="15" frequency="3" timeframe="60">
+    <if_matched_sid>100001</if_matched_sid>
     <same_source_ip />
-    <description>SSH success after $(frequency) failures from $(srcip)</description>
-    </rule>
+    <description>SSH multiple authentication failures from same IP</description>
+    <mitre>
+      <id>T1110</id>
+    </mitre>
+    <group>authentication_failed,brute_force,</group>
+  </rule>
+
+  <rule id="100003" level="15">
+    <match>Accepted password for</match>
+    <description>SSH successful authentication</description>
+    <mitre>
+      <id>T1078</id>
+    </mitre>
+    <group>authentication_success,</group>
+  </rule>
+
+  <rule id="100004" level="15" timeframe="300">
+    <if_matched_sid>100002</if_matched_sid>
+    <if_matched_sid>100003</if_matched_sid>
+    <same_source_ip />
+    <description>CRITICAL: SSH brute force followed by successful login</description>
+    <mitre>
+      <id>T1110</id>
+      <id>T1078</id>
+    </mitre>
+    <group>authentication_success,attacks,brute_force_success,</group>
+  </rule>
+
+  <rule id="100005" level="15" timeframe="300">
+    <if_matched_sid>100004</if_matched_sid>
+    <list field="user" lookup="not_address_match_key">etc/lists/known_users</list>
+    <description>CRITICAL: SSH brute force success with unknown user</description>
+    <mitre>
+      <id>T1110</id>
+      <id>T1078</id>
+    </mitre>
+    <group>authentication_success,attacks,unknown_user,</group>
+  </rule>
+
 </group>

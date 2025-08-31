@@ -105,8 +105,6 @@ finally the architecture of Wazuh stack that run in the previous docker swarm cl
 
 - Github Actions workflow screen shots:
 
-    ![actions-1](imgs/Screenshot-actions-1.png)
-
-    ![actions-2](imgs/Screenshot-actions-2.png)
+    ![actions-1](imgs/actions-1.gif)
 
     ![actions-3](imgs/Screenshot-actions-3.png)

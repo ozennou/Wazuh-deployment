@@ -7,16 +7,13 @@ Deployment of Wazuh stack in docker swarm cluster using Ansible and Github Actio
 - [Prerequisites](#prerequisites)
 - [Screenshots](#screenshots)
 
-> [!NOTE]  
-> I’d like to inform you that I included some additional topics beyond the main subject, example of infra directories, because I believe they add value to the challenge. Thank you for your understanding.
-
 ## Completed Tasks
-- [x] Infrastructure for Github self-hosted runner in Azure using Terraform & Ansible (additional).
-- [x] Infrastructure for docker swarm cluster with multiple masters & workers in Azure using Terraform (additional + bonus).
-- [x] Configure Wazuh stack multi node(with bonus):
+- [x] Infrastructure for Github self-hosted runner in Azure using Terraform & Ansible.
+- [x] Infrastructure for docker swarm cluster with multiple masters & workers in Azure using Terraform .
+- [x] Configure Wazuh stack multi node:
     - Wazuh dashboard: ≥2 replicas behind Nginx as load balancer.
     - Wazuh manager: clustered deployment (master/worker).
-    - Wazuh indexer (I’m facing multiple issues configuring ≥3 data nodes, and due to limited time I’m skipping it).
+    - Wazuh indexer.
     - Nginx as reverse proxy & load balancer for Wazuh dashboard replicas.
 - [x] Develop shell script for generating self signed certificates for Wazuh stack and Nginx.
 - [x] Add healthchecks for wazuh stack(indexer, manager & dashboard) and nginx.
@@ -33,9 +30,9 @@ Deployment of Wazuh stack in docker swarm cluster using Ansible and Github Actio
     - authenticate with a non-admin user and check the login form and landing page elements.
 - [x] Configure Github Actions workflow for:
     - scan the docker image used in wazuh stack & nginx using Trivy.
-    - performe a linting check using yamllint.(bonus)
+    - performe a linting check using yamllint.
     - deploy wazuh stack to docker swarm cluster using ansible playbook and save the secret in github encrypted secret + ansible vault.
-    - testing health probe of the front-end api.(bonus)
+    - testing health probe of the front-end api.
     - post-deployment testing using python script with selenium webdriver.
     
 ## Wazuh deployment architecture
